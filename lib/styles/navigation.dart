@@ -80,5 +80,3 @@ void showCommentsPopup(BuildContext context) {
     },
   );
 }
-
-// To use this function, call showCommentsPopup(context) where you want to show the container.

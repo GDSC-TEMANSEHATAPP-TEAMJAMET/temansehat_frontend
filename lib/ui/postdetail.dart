@@ -9,6 +9,7 @@ import 'package:temansehat_app/ui/news.dart';
 import 'package:temansehat_app/ui/profile.dart';
 
 class DetailPage extends StatefulWidget {
+  
   DetailPage({Key? key}) : super(key: key);
 
   @override
@@ -153,7 +154,6 @@ class _DetailPageState extends State<DetailPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Container(
-                     
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [

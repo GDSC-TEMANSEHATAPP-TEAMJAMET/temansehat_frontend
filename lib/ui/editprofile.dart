@@ -45,7 +45,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
       user = fetchedUser;
       if (user != null) {
         _nameController.text = user!.username;
-        _bioController.text = user!.bio;
+        _bioController.text = user!.bio == null ? "" : user!.bio!;
       }
     });
   }

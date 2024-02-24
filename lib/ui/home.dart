@@ -138,13 +138,13 @@ class _HomePageState extends State<HomePage> {
             ],
           ),
         ),
-        body: FutureBuilder(
+        body: FutureBuilder<User?>(
             future: getUserData(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return Center(child: CircularProgressIndicator());
               } else {
-                User user = snapshot.data! as User;
+                User? user = snapshot.data;
                 return Stack(children: [
                   Container(
                     width: double.infinity,
@@ -170,7 +170,7 @@ class _HomePageState extends State<HomePage> {
                                 Padding(
                                   padding:
                                       EdgeInsets.only(bottom: height * 0.0125),
-                                  child: Text("Hello, ${user.username}!",
+                                  child: Text("Hello, ${user!.username}!",
                                       style: TextStyle(
                                           color: bgColor,
                                           fontSize: 17.5,
@@ -187,14 +187,23 @@ class _HomePageState extends State<HomePage> {
                                   child: ClipRRect(
                                     borderRadius: BorderRadius.circular(
                                         20), // Adjust the radius as needed
-                                    child: Image.memory(
-                                      base64Decode(user.pfp),
+                                    child:
+                                        user.pfp != null
+                                            ? Image.memory(
+                                                base64Decode(user.pfp!),
+                                                fit: BoxFit.cover,
+                                                width: width * 0.35,
+                                                height: width * 0.35,
+                                              )
+                                            :
+                                        Image.asset(
+                                      'assets/nopfp.jpg',
                                       fit: BoxFit.cover,
                                       width: width * 0.35,
                                       height: width * 0.35,
                                     ),
                                   ),
-                                ),
+                                )
                               ],
                             ),
                           ),

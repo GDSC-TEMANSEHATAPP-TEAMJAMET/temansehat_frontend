@@ -156,10 +156,20 @@ class _ProfilePageState extends State<ProfilePage> {
                         child: Column(
                           children: [
                             InkWell(
-                              child: CircleAvatar(
-                                backgroundImage:
-                                    MemoryImage(base64Decode(user.pfp)),
-                                radius: 60,
+                              child: ClipOval(
+                                child: user.pfp != null
+                                    ? Image.memory(
+                                        base64Decode(user.pfp!),
+                                        fit: BoxFit.cover,
+                                        width: width * 0.35,
+                                        height: width * 0.35,
+                                      )
+                                    : Image.asset(
+                                        'assets/nopfp.jpg',
+                                        fit: BoxFit.cover,
+                                        width: width * 0.35,
+                                        height: width * 0.35,
+                                      ),
                               ),
                             ),
                             Text(user.username,
@@ -172,7 +182,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             Container(
                               width: 300,
                               child: Text(
-                                user.bio,
+                                user.bio == null ? '' : user.bio!,
                                 textAlign: TextAlign.center,
                               ),
                             ),
@@ -217,8 +227,34 @@ class ToggleButtonScreen extends StatefulWidget {
 }
 
 class _ToggleButtonScreenState extends State<ToggleButtonScreen> {
+  Future<Map<String, dynamic>> getPost() async {
+    String? accessToken = await getTokenLocally();
+    final response = await http.get(
+      Uri.parse('$backendUri/api/users/posts'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $accessToken',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      var responseData = jsonDecode(response.body);
+
+      if (responseData.isNotEmpty) {
+        return responseData;
+      } else {
+        print('No posts found in the response');
+        return {};
+      }
+    } else {
+      print('Get Post failed');
+      return {}; // Return null or handle the error accordingly
+    }
+  }
+
   List<bool> isSelected = [true, false];
-  Future<Moods?> getMood() async {
+
+  Future<Map<String, dynamic>> getMood() async {
     String? userId = await getUserIdLocally();
     String? accessToken = await getTokenLocally();
     final response = await http.get(
@@ -230,15 +266,17 @@ class _ToggleButtonScreenState extends State<ToggleButtonScreen> {
     );
 
     if (response.statusCode == 200) {
-      print(response.body);
-      Map<String, dynamic> jsonMap = json.decode(response.body);
-      Moods moods = Moods.fromJson(jsonMap);
+      var responseData = jsonDecode(response.body);
 
-      return moods;
+      if (responseData.isNotEmpty) {
+        return responseData;
+      } else {
+        print('No Mood found in the response');
+        return {};
+      }
     } else {
-      print(response.body);
-      print('Get Data failed');
-      return null; // Return null or handle the error accordingly
+      print('Get Mood failed');
+      return {}; // Return null or handle the error accordingly
     }
   }
 
@@ -248,106 +286,43 @@ class _ToggleButtonScreenState extends State<ToggleButtonScreen> {
     return FutureBuilder(
         future: getMood(),
         builder: (context, snapshot) {
-          Moods moods = snapshot.data as Moods;
-          return Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                Container(
-                  decoration: BoxDecoration(
-                    border: Border(
-                        bottom: BorderSide(color: bluePrimary, width: 3)),
-                  ),
-                  child: ToggleButtons(
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(10),
-                      topRight: Radius.circular(10),
+          Map<String, dynamic> moods = snapshot.data!;
+          if (moods == null) {
+            return CircularProgressIndicator();
+          } else {
+            return Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Expanded(
+                child: Column(
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        border: Border(
+                            bottom: BorderSide(color: bluePrimary, width: 3)),
+                      ),
+                      child: ToggleButtons(
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(10),
+                          topRight: Radius.circular(10),
+                        ),
+                        fillColor: blueSecondary,
+                        isSelected: isSelected,
+                        onPressed: _toggleSelection,
+                        children: [
+                          _toggleButtonChild('Posts'),
+                          _toggleButtonChild('Mood History'),
+                        ],
+                      ),
                     ),
-                    fillColor: blueSecondary,
-                    isSelected: isSelected,
-                    onPressed: _toggleSelection,
-                    children: [
-                      _toggleButtonChild('Posts'),
-                      _toggleButtonChild('Mood History'),
-                    ],
-                  ),
+                    const SizedBox(height: 16),
+                    isSelected[0]
+                        ? _buildPostContent(height)
+                        : Text('no data')
+                  ],
                 ),
-                const SizedBox(height: 16),
-                isSelected[0]
-                    ? _buildPostContent(height)
-                     : Text('no data')// ListView.builder(
-                    //     itemCount: moods.entries.length,
-                    //     itemBuilder: (context, index) {
-                    //       var entry = moods.entries.values.elementAt(index);
-                    //       return Container(
-                    //         height: 150,
-                    //         padding: const EdgeInsets.all(15),
-                    //         margin: const EdgeInsets.all(10),
-                    //         decoration: BoxDecoration(
-                    //           color: Colors.blue,
-                    //           borderRadius: BorderRadius.circular(10),
-                    //         ),
-                    //         child: Column(
-                    //           crossAxisAlignment: CrossAxisAlignment.start,
-                    //           children: [
-                    //             RichText(
-                    //               text: TextSpan(
-                    //                 children: [
-                    //                   TextSpan(
-                    //                     text: 'Feeling: ',
-                    //                     style: TextStyle(
-                    //                       fontWeight: FontWeight.bold,
-                    //                       fontSize: 18,
-                    //                       color: Colors.white,
-                    //                     ),
-                    //                   ),
-                    //                   TextSpan(
-                    //                     text: entry.feeling,
-                    //                     style: TextStyle(
-                    //                       fontSize: 18,
-                    //                       color: Colors.white,
-                    //                     ),
-                    //                   ),
-                    //                   TextSpan(
-                    //                     text: '\nStory: ',
-                    //                     style: TextStyle(
-                    //                       fontSize: 18,
-                    //                       color: Colors.white,
-                    //                     ),
-                    //                   ),
-                    //                   TextSpan(
-                    //                     text: entry.story,
-                    //                     style: TextStyle(
-                    //                       fontSize: 18,
-                    //                       color: Colors.white,
-                    //                     ),
-                    //                   ),
-                    //                 ],
-                    //               ),
-                    //             ),
-                    //             const SizedBox(height: 10),
-                    //             Row(
-                    //               mainAxisAlignment:
-                    //                   MainAxisAlignment.spaceBetween,
-                    //               children: [
-                    //                 Text(
-                    //                   'Mood Date: ${entry.moodDate}',
-                    //                   style: TextStyle(
-                    //                     color: Colors.white,
-                    //                     fontSize: 14,
-                    //                     fontWeight: FontWeight.normal,
-                    //                   ),
-                    //                 ),
-                    //               ],
-                    //             ),
-                    //           ],
-                    //         ),
-                    //       );
-                    //     },
-                    //   ),
-              ],
-            ),
-          );
+              ),
+            );
+          }
         });
   }
 

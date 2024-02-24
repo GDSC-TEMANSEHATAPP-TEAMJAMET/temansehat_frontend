@@ -22,26 +22,6 @@ class ForumPage extends StatefulWidget {
 }
 
 class _ForumPageState extends State<ForumPage> {
-  List<Post> posts = [];
-
-  @override
-  void initState() {
-    super.initState();
-    // Fetch posts when the widget initializes
-    fetchPosts();
-  }
-
-  Future<void> fetchPosts() async {
-    // Fetch posts using the getPost function
-    Post? post = await getPost();
-    if (post != null) {
-      setState(() {
-        // Update the state with the fetched post
-        posts.add(post);
-      });
-    }
-  }
-
   int _currentIndex = 2; // Set the initial index to ForumPage
   final List<Widget> destinations = [
     const HomePage(),
@@ -61,7 +41,7 @@ class _ForumPageState extends State<ForumPage> {
     );
   }
 
-  Future<Post?> getPost() async {
+  Future<Map<String, dynamic>> getPost() async {
     String? accessToken = await getTokenLocally();
     final response = await http.get(
       Uri.parse('$backendUri/api/users/posts'),
@@ -73,18 +53,16 @@ class _ForumPageState extends State<ForumPage> {
 
     if (response.statusCode == 200) {
       var responseData = jsonDecode(response.body);
+
       if (responseData.isNotEmpty) {
-        var postId = responseData.keys.first;
-        var postJson = responseData[postId];
-        return Post.fromJson(postJson..['postId'] = postId);
+        return responseData;
       } else {
         print('No posts found in the response');
-        return null;
+        return {};
       }
     } else {
-      print(response.body);
       print('Get Post failed');
-      return null; // Return null or handle the error accordingly
+      return {}; // Return null or handle the error accordingly
     }
   }
 
@@ -123,313 +101,270 @@ class _ForumPageState extends State<ForumPage> {
     final height = MediaQuery.of(context).size.height;
 
     return Scaffold(
-      bottomNavigationBar: Container(
-        height: 80,
-        decoration: BoxDecoration(
-          color: bluePrimary,
-        ),
-        child: BottomNavigationBar(
-          type: BottomNavigationBarType.fixed,
-          backgroundColor: bluePrimary,
-          showSelectedLabels: false,
-          selectedFontSize: 0,
-          unselectedFontSize: 0,
-          selectedIconTheme: IconThemeData(color: blueSecondary, size: 27),
-          unselectedIconTheme: IconThemeData(color: grey, size: 27),
-          currentIndex: 2,
-          onTap: _onItemTapped,
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home_outlined),
-              label: "Home",
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.mood),
-              label: "Mood",
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.forum_outlined),
-              label: "Forum",
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.newspaper_outlined),
-              label: "News",
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person_outline),
-              label: "Profile",
-            ),
-          ],
-        ),
-      ),
-      backgroundColor: bluePrimary,
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(120),
-        child: Container(
+        bottomNavigationBar: Container(
+          height: 80,
           decoration: BoxDecoration(
-            color: forumDark,
-            borderRadius: const BorderRadius.only(
-                bottomLeft: Radius.circular(20),
-                bottomRight: Radius.circular(20)),
+            color: bluePrimary,
           ),
-          height: 120,
-          child: Padding(
-            padding: const EdgeInsets.only(top: 20.0),
-            child: AppBar(
-              automaticallyImplyLeading: false,
-              backgroundColor: forumDark,
-              shape: const RoundedRectangleBorder(
-                  borderRadius:
-                      BorderRadius.vertical(bottom: Radius.circular(20))),
-              title: ElevatedButton.icon(
-                  style: postAppBar(context),
-                  icon: Icon(Icons.arrow_back_ios_new_rounded,
-                      color: Colors.white),
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  label: Text(
-                    "CommunitySehat",
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: width * 0.04,
-                        fontWeight: FontWeight.bold),
-                  )),
-              centerTitle: true,
+          child: BottomNavigationBar(
+            type: BottomNavigationBarType.fixed,
+            backgroundColor: bluePrimary,
+            showSelectedLabels: false,
+            selectedFontSize: 0,
+            unselectedFontSize: 0,
+            selectedIconTheme: IconThemeData(color: blueSecondary, size: 27),
+            unselectedIconTheme: IconThemeData(color: grey, size: 27),
+            currentIndex: 2,
+            onTap: _onItemTapped,
+            items: const [
+              BottomNavigationBarItem(
+                icon: Icon(Icons.home_outlined),
+                label: "Home",
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.mood),
+                label: "Mood",
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.forum_outlined),
+                label: "Forum",
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.newspaper_outlined),
+                label: "News",
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.person_outline),
+                label: "Profile",
+              ),
+            ],
+          ),
+        ),
+        backgroundColor: bluePrimary,
+        appBar: PreferredSize(
+          preferredSize: const Size.fromHeight(120),
+          child: Container(
+            decoration: BoxDecoration(
+              color: forumDark,
+              borderRadius: const BorderRadius.only(
+                  bottomLeft: Radius.circular(20),
+                  bottomRight: Radius.circular(20)),
+            ),
+            height: 120,
+            child: Padding(
+              padding: const EdgeInsets.only(top: 20.0),
+              child: AppBar(
+                automaticallyImplyLeading: false,
+                backgroundColor: forumDark,
+                shape: const RoundedRectangleBorder(
+                    borderRadius:
+                        BorderRadius.vertical(bottom: Radius.circular(20))),
+                title: ElevatedButton.icon(
+                    style: postAppBar(context),
+                    icon: Icon(Icons.arrow_back_ios_new_rounded,
+                        color: Colors.white),
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    label: Text(
+                      "CommunitySehat",
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: width * 0.04,
+                          fontWeight: FontWeight.bold),
+                    )),
+                centerTitle: true,
+              ),
             ),
           ),
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => PostPage()),
-          );
-        },
-        child: Icon(
-          Icons.add,
-          color: Colors.white,
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => PostPage()),
+            );
+          },
+          child: Icon(
+            Icons.add,
+            color: Colors.white,
+          ),
+          backgroundColor: forumDark, // Change the background color as needed
         ),
-        backgroundColor: forumDark, // Change the background color as needed
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      body: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
-        child: Column(
-          children: [
-            Center(
-              child: posts.isNotEmpty
-                  ? ListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: posts.length,
-                      itemBuilder: (context, index) {
-                        Post post = posts[index];
+        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+        body: FutureBuilder<Map<String, dynamic>>(
+          future: getPost(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasError) {
+              return Text('Error: ${snapshot.error}');
+            } else {
+              Map<String, dynamic> posts = snapshot.data!;
 
-                        return GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => PostPage()),
-                            );
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.only(top: 20),
-                            child: InkWell(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => DetailPage(),
-                                  ),
-                                );
-                              },
-                              child: Center(
-                                child: GestureDetector(
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) => PostPage()),
-                                    );
-                                  },
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(top: 20),
-                                    child: InkWell(
-                                      onTap: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) =>
-                                                  DetailPage()),
-                                        );
-                                      },
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                            color: bluePrimary,
-                                            borderRadius:
-                                                BorderRadius.circular(20),
-                                            border:
-                                                Border.all(color: forumDark)),
-                                        alignment: Alignment.center,
-                                        width: 360,
-                                        height: 347,
-                                        padding: const EdgeInsets.all(16.0),
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            // Baris 1: Profile Picture, Username, dan Waktu Post
-                                            Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
-                                              children: [
-                                                Row(
-                                                  children: [
-                                                    CircleAvatar(
-                                                      radius: 20.0,
-                                                      backgroundImage:
-                                                          MemoryImage(
-                                                              base64Decode(post
-                                                                  .userPfp!)),
-                                                    ),
-                                                    SizedBox(width: 5),
-                                                    Text(post.username,
-                                                        style: TextStyle(
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                            fontSize: 13,
-                                                            color:
-                                                                Colors.white)),
-                                                  ],
-                                                ),
-                                                Text(
-                                                  post.postDate!,
-                                                  style: TextStyle(
-                                                      color: Colors.white,
-                                                      fontSize: 13),
-                                                ),
-                                              ],
-                                            ),
-                                            const SizedBox(height: 10.0),
+              return ListView.builder(
+                itemCount: posts.length,
+                itemBuilder: (context, index) {
+                  String postId = posts.keys.elementAt(index);
+                  Map<String, dynamic> postData = posts[postId];
+                  if (postData['description'].length > 50) {
+                    String originalText = postData['description'];
+                    String displayedText = originalText.substring(0, 47);
+                    if (originalText.length > displayedText.length) {
+                      displayedText += "...";
+                    }
+                  }
 
-                                            // Baris 2: Judul Postingan
-                                            Text(
-                                              post.title,
-                                              style: TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 15.0,
-                                                  color: Colors.white),
-                                            ),
-                                            const SizedBox(height: 5.0),
-
-                                            // Baris 3: Gambar yang diattach
-                                            Expanded(
-                                              child: InkWell(
-                                                onTap: () {
-                                                  showDialog(
-                                                    context: context,
-                                                    builder: (BuildContext
-                                                            context) =>
-                                                        FullScreenImageDialog(
-                                                      imagePath:
-                                                          'assets/foto.JPG', // Ganti dengan path gambar yang sesuai
-                                                    ),
-                                                  );
-                                                },
-                                                child: Image(
-                                                  image: AssetImage(
-                                                      'assets/foto.JPG'),
-                                                  fit: BoxFit.cover,
-                                                ),
-                                              ),
-                                            ),
-
-                                            const SizedBox(height: 5.0),
-                                            Text(
-                                              post.desc!,
-                                              style: TextStyle(
-                                                  fontSize: 12.0,
-                                                  color: Colors.white),
-                                            ),
-
-                                            // Baris 5: Icon Like, Dislike, Comment, dan Share
-                                            Align(
-                                              alignment: Alignment.bottomRight,
-                                              child: Container(
-                                                padding: EdgeInsets.all(16.0),
-                                                child: Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment.end,
-                                                  children: [
-                                                    IconButton(
-                                                      onPressed: () {
-                                                        // Add your logic for thumb up action
-                                                      },
-                                                      icon: Icon(
-                                                        Icons
-                                                            .thumb_up_alt_rounded,
-                                                        color: Colors.white,
-                                                        size: 15,
-                                                      ),
-                                                    ),
-                                                    IconButton(
-                                                      onPressed: () {
-                                                        // Add your logic for thumb down action
-                                                      },
-                                                      icon: Icon(
-                                                        Icons
-                                                            .thumb_down_alt_rounded,
-                                                        color: Colors.white,
-                                                        size: 15,
-                                                      ),
-                                                    ),
-                                                    IconButton(
-                                                      onPressed: () {
-                                                        // Add your logic for comment action
-                                                      },
-                                                      icon: Icon(
-                                                        Icons
-                                                            .mode_comment_rounded,
-                                                        color: Colors.white,
-                                                        size: 15,
-                                                      ),
-                                                    ),
-                                                    IconButton(
-                                                      onPressed: () {
-                                                        // Add your logic for share action
-                                                      },
-                                                      icon: Icon(
-                                                        Icons.share,
-                                                        color: Colors.white,
-                                                        size: 15,
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ),
-                                          ],
+                  return GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => DetailPage(
+                              // postId: postId,
+                              // postTitle: postData['title'],
+                              // postDescription: postData['desc'],
+                              ),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
+                          color: bluePrimary,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: forumDark)),
+                      alignment: Alignment.center,
+                      width: 360,
+                      height: postData['images'[0]] == null
+                          ? height * 0.26
+                          : height * 0.4,
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Row(
+                                children: [
+                                  postData['user_pfp'] != null
+                                      ? CircleAvatar(
+                                          radius: 20.0,
+                                          backgroundImage: MemoryImage(
+                                              base64Decode(
+                                                  postData['user_pfp'])),
+                                        )
+                                      : CircleAvatar(
+                                          radius: 20.0,
+                                          backgroundImage:
+                                              AssetImage('assets/nopfp.jpg'),
                                         ),
-                                      ),
+                                  SizedBox(width: 5),
+                                  Text(postData['username'],
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 13,
+                                          color: Colors.white)),
+                                ],
+                              ),
+                              Text(
+                                postData['post_date'],
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: 13),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 10.0),
+                          Text(
+                            postData['title'],
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 15.0,
+                                color: Colors.white),
+                          ),
+                          const SizedBox(height: 5.0),
+                          postData['images'[0]] != null
+                              ? Expanded(
+                                  child: InkWell(
+                                    onTap: () {
+                                      showDialog(
+                                        context: context,
+                                        builder: (BuildContext context) =>
+                                            FullScreenImageDialog(
+                                          imagePath: postData['image'[
+                                              0]], // Ganti dengan path gambar yang sesuai
+                                        ),
+                                      );
+                                    },
+                                    child: Image(
+                                      image: MemoryImage(
+                                          base64Decode(postData['image'[0]])),
+                                      fit: BoxFit.cover,
                                     ),
                                   ),
+                                )
+                              : SizedBox(
+                                  height: 5,
                                 ),
+
+                          const SizedBox(height: 5.0),
+                          Text(
+                            postData['description'],
+                            style:
+                                TextStyle(fontSize: 12.0, color: Colors.white),
+                          ),
+
+                          // Baris 5: Icon Like, Dislike, Comment, dan Share
+                          Align(
+                            alignment: Alignment.bottomRight,
+                            child: Container(
+                              padding: EdgeInsets.all(16.0),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  IconButton(
+                                    onPressed: () {
+                                      // Add your logic for thumb up action
+                                    },
+                                    icon: Icon(
+                                      Icons.thumb_up_alt_rounded,
+                                      color: Colors.white,
+                                      size: 15,
+                                    ),
+                                  ),
+                                  IconButton(
+                                    onPressed: () {
+                                      // Add your logic for comment action
+                                    },
+                                    icon: Icon(
+                                      Icons.mode_comment_rounded,
+                                      color: Colors.white,
+                                      size: 15,
+                                    ),
+                                  ),
+                                  IconButton(
+                                    onPressed: () {
+                                      // Add your logic for share action
+                                    },
+                                    icon: Icon(
+                                      Icons.share,
+                                      color: Colors.white,
+                                      size: 15,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ),
-                        );
-                      },
-                    )
-                  : CircularProgressIndicator(), // Show loading indicator while posts are being fetched
-            ),
-          ],
-        ),
-      ),
-    );
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              );
+            }
+          },
+        ));
   }
 }
 
@@ -446,7 +381,7 @@ class FullScreenImageDialog extends StatelessWidget {
         decoration: BoxDecoration(
           image: DecorationImage(
             fit: BoxFit.contain,
-            image: AssetImage(imagePath),
+            image: MemoryImage(base64Decode(imagePath)),
           ),
         ),
         child: GestureDetector(

@@ -1,8 +1,8 @@
 class User {
   final String username;
-  final String bio;
+  final String? bio;
   final String email;
-  final String pfp;
+  final String? pfp;
 
   User({
     required this.username,
