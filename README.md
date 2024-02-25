@@ -1,6 +1,6 @@
 # TemanSehat
 
-Introducing FoodShare, TemanSehat is a community mental health app dedicated to providing a safe space for individuals to express their thoughts and feelings.
+Introducing TemanSehat, TemanSehat is a community mental health app dedicated to providing a safe space for individuals to express their thoughts and feelings.
 ## Setup and Installation
 ### Running in your phone
 #### Step 1
