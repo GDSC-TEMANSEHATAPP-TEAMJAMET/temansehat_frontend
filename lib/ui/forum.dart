@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:temansehat_app/models/posts.dart';
 import 'package:temansehat_app/styles/button.dart';
 import 'package:http/http.dart' as http;
 import 'package:temansehat_app/styles/color.dart';
@@ -22,6 +21,8 @@ class ForumPage extends StatefulWidget {
 }
 
 class _ForumPageState extends State<ForumPage> {
+  String post_Id = '';
+  bool like = false;
   int _currentIndex = 2; // Set the initial index to ForumPage
   final List<Widget> destinations = [
     const HomePage(),
@@ -57,11 +58,9 @@ class _ForumPageState extends State<ForumPage> {
       if (responseData.isNotEmpty) {
         return responseData;
       } else {
-        print('No posts found in the response');
         return {};
       }
     } else {
-      print('Get Post failed');
       return {}; // Return null or handle the error accordingly
     }
   }
@@ -69,12 +68,12 @@ class _ForumPageState extends State<ForumPage> {
   Future<void> likePost() async {
     String? userId = await getUserIdLocally();
     String? accessToken = await getTokenLocally();
-    final String apiUrl = '$backendUri/api/users/posts';
+    final String apiUrl = '$backendUri/api/users/posts/likes';
 
     final Map<String, dynamic> payload = {
       'user_id': userId,
-      'title': '',
-      'desc': '',
+      'post_id': post_Id,
+      'like': like,
     };
 
     final response = await http.post(
@@ -89,9 +88,6 @@ class _ForumPageState extends State<ForumPage> {
     // Menangani respons dari server
 
     if (response.statusCode == 201) {
-      print('like uploaded successfully');
-    } else {
-      print('Error');
     }
   }
 
@@ -142,7 +138,7 @@ class _ForumPageState extends State<ForumPage> {
         ),
         backgroundColor: bluePrimary,
         appBar: PreferredSize(
-          preferredSize: const Size.fromHeight(120),
+          preferredSize: Size.fromHeight(120),
           child: Container(
             decoration: BoxDecoration(
               color: forumDark,
@@ -202,17 +198,16 @@ class _ForumPageState extends State<ForumPage> {
             } else {
               Map<String, dynamic> posts = snapshot.data!;
 
-              return ListView.builder(
+              return ListView.separated(
                 itemCount: posts.length,
+                separatorBuilder: (BuildContext context, int index) =>
+                    SizedBox(height: 20),
                 itemBuilder: (context, index) {
                   String postId = posts.keys.elementAt(index);
                   Map<String, dynamic> postData = posts[postId];
-                  if (postData['description'].length > 50) {
-                    String originalText = postData['description'];
-                    String displayedText = originalText.substring(0, 47);
-                    if (originalText.length > displayedText.length) {
-                      displayedText += "...";
-                    }
+                  Map<String, dynamic>? commentsData = postData['comment'];
+                  if (commentsData != null) {
+                    commentsData.forEach((commentId, commentData) {});
                   }
 
                   return GestureDetector(
@@ -221,10 +216,12 @@ class _ForumPageState extends State<ForumPage> {
                         context,
                         MaterialPageRoute(
                           builder: (context) => DetailPage(
-                              // postId: postId,
-                              // postTitle: postData['title'],
-                              // postDescription: postData['desc'],
-                              ),
+                            postId: postId,
+                            description: postData['description'],
+                            postDate: postData['post_date'],
+                            title: postData['title'],
+                            commentsData: commentsData,
+                          ),
                         ),
                       );
                     },
@@ -234,10 +231,8 @@ class _ForumPageState extends State<ForumPage> {
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(color: forumDark)),
                       alignment: Alignment.center,
-                      width: 360,
-                      height: postData['images'[0]] == null
-                          ? height * 0.26
-                          : height * 0.4,
+                      width: width * 0.35,
+                      height: height * 0.3,
                       padding: const EdgeInsets.all(16.0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -283,38 +278,15 @@ class _ForumPageState extends State<ForumPage> {
                                 color: Colors.white),
                           ),
                           const SizedBox(height: 5.0),
-                          postData['images'[0]] != null
-                              ? Expanded(
-                                  child: InkWell(
-                                    onTap: () {
-                                      showDialog(
-                                        context: context,
-                                        builder: (BuildContext context) =>
-                                            FullScreenImageDialog(
-                                          imagePath: postData['image'[
-                                              0]], // Ganti dengan path gambar yang sesuai
-                                        ),
-                                      );
-                                    },
-                                    child: Image(
-                                      image: MemoryImage(
-                                          base64Decode(postData['image'[0]])),
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ),
-                                )
-                              : SizedBox(
-                                  height: 5,
-                                ),
-
                           const SizedBox(height: 5.0),
                           Text(
-                            postData['description'],
+                            postData['description'].length > 50
+                                ? postData['description'].substring(0, 47) +
+                                    "..."
+                                : postData['description'],
                             style:
                                 TextStyle(fontSize: 12.0, color: Colors.white),
                           ),
-
-                          // Baris 5: Icon Like, Dislike, Comment, dan Share
                           Align(
                             alignment: Alignment.bottomRight,
                             child: Container(
@@ -324,7 +296,9 @@ class _ForumPageState extends State<ForumPage> {
                                 children: [
                                   IconButton(
                                     onPressed: () {
-                                      // Add your logic for thumb up action
+                                      setState(() {
+                                        post_Id = postId;
+                                      });
                                     },
                                     icon: Icon(
                                       Icons.thumb_up_alt_rounded,
@@ -365,33 +339,5 @@ class _ForumPageState extends State<ForumPage> {
             }
           },
         ));
-  }
-}
-
-class FullScreenImageDialog extends StatelessWidget {
-  final String imagePath;
-
-  FullScreenImageDialog({required this.imagePath});
-
-  @override
-  Widget build(BuildContext context) {
-    return Dialog(
-      backgroundColor: Colors.transparent,
-      child: Container(
-        decoration: BoxDecoration(
-          image: DecorationImage(
-            fit: BoxFit.contain,
-            image: MemoryImage(base64Decode(imagePath)),
-          ),
-        ),
-        child: GestureDetector(
-          onTap: () {
-            // Tutup dialog ketika gambar di ketuk
-            Navigator.of(context).pop();
-          },
-          child: Container(), // Container kosong untuk menangkap gesture
-        ),
-      ),
-    );
   }
 }

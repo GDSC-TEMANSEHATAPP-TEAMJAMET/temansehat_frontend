@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
-import 'package:temansehat_app/models/moods.dart';
 import 'package:temansehat_app/models/user.dart';
 import 'package:temansehat_app/styles/button.dart';
 import 'package:temansehat_app/styles/color.dart';
@@ -11,8 +10,8 @@ import 'package:temansehat_app/ui/forum.dart';
 import 'package:temansehat_app/ui/home.dart';
 import 'package:temansehat_app/ui/mood.dart';
 import 'package:temansehat_app/ui/news.dart';
+import 'package:temansehat_app/ui/postdetail.dart';
 import 'package:temansehat_app/ui/setting.dart';
-import 'package:temansehat_app/utils/api.dart';
 import 'package:temansehat_app/utils/preferences.dart';
 import 'package:temansehat_app/utils/uri.dart';
 
@@ -213,7 +212,6 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
               );
             }
-            return Container();
           }),
     );
   }
@@ -228,9 +226,10 @@ class ToggleButtonScreen extends StatefulWidget {
 
 class _ToggleButtonScreenState extends State<ToggleButtonScreen> {
   Future<Map<String, dynamic>> getPost() async {
+    String? userId = await getUserIdLocally();
     String? accessToken = await getTokenLocally();
     final response = await http.get(
-      Uri.parse('$backendUri/api/users/posts'),
+      Uri.parse('$backendUri/api/users/posts/$userId'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $accessToken',
@@ -284,11 +283,15 @@ class _ToggleButtonScreenState extends State<ToggleButtonScreen> {
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height;
     return FutureBuilder(
-        future: getMood(),
+        future: Future.wait([getPost(), getMood()]),
         builder: (context, snapshot) {
-          Map<String, dynamic> moods = snapshot.data!;
-          if (moods == null) {
-            return CircularProgressIndicator();
+          Map<String, dynamic> moods = snapshot.data![1];
+          Map<String, dynamic> posts = snapshot.data![0];
+
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Text('Error: ${snapshot.error}');
           } else {
             return Padding(
               padding: const EdgeInsets.all(16.0),
@@ -316,8 +319,155 @@ class _ToggleButtonScreenState extends State<ToggleButtonScreen> {
                     ),
                     const SizedBox(height: 16),
                     isSelected[0]
-                        ? _buildPostContent(height)
-                        : Text('no data')
+                        ? SizedBox(
+                            height: 300,
+                            child: ListView.separated(
+                                itemCount: posts.length,
+                                separatorBuilder:
+                                    (BuildContext context, int index) =>
+                                        SizedBox(height: 10),
+                                itemBuilder: (context, index) {
+                                  String postId = posts.keys.elementAt(index);
+                                  Map<String, dynamic> postData = posts[postId];
+                                  Map<String, dynamic>? commentsData =
+                                      postData['comment'];
+                                  if (commentsData != null) {
+                                    // Iterate through comments
+                                    commentsData
+                                        .forEach((commentId, commentData) {
+                                      String? username =
+                                          commentData?["username"];
+                                      String? commentDesc =
+                                          commentData?["comment_desc"];
+                                      String? commentDate =
+                                          commentData?["comment_date"];
+
+                                      // Use the comment data as needed
+                                      print(
+                                          "Username: $username, Comment: $commentDesc, Date: $commentDate");
+                                    });
+                                  }
+                                  return GestureDetector(
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => DetailPage(
+                                            postId: postId,
+                                            description:
+                                                postData['description'],
+                                            postDate: postData['post_date'],
+                                            title: postData['title'],
+                                            commentsData: commentsData,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                    child: Container(
+                                      height: height * 0.121,
+                                      padding: const EdgeInsets.all(15),
+                                      decoration: BoxDecoration(
+                                        color: bluePrimary,
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            postData['title'],
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          SizedBox(height: 8),
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Text(
+                                                postData['post_date'],
+                                                style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 10,
+                                                  fontWeight: FontWeight.normal,
+                                                ),
+                                              ),
+                                              Text(
+                                                'x likes | x comments',
+                                                style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 10,
+                                                  fontWeight: FontWeight.normal,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                }),
+                          )
+                        : SizedBox(
+                            height: 300,
+                            child: ListView.separated(
+                                itemCount: moods.length,
+                                separatorBuilder:
+                                    (BuildContext context, int index) =>
+                                        SizedBox(height: 10),
+                                itemBuilder: (context, index) {
+                                  String moodId = moods.keys.elementAt(index);
+                                  Map<String, dynamic> moodData = moods[moodId];
+                                  return Container(
+                                    height: height * 0.121,
+                                    padding: const EdgeInsets.all(15),
+                                    decoration: BoxDecoration(
+                                      color: bluePrimary,
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          moodData['story'],
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        SizedBox(height: 8),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Text(
+                                              moodData['mood_date'],
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 10,
+                                                fontWeight: FontWeight.normal,
+                                              ),
+                                            ),
+                                            Text(
+                                              moodData['feeling'],
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                }),
+                          )
                   ],
                 ),
               ),
@@ -336,52 +486,6 @@ class _ToggleButtonScreenState extends State<ToggleButtonScreen> {
           textAlign: TextAlign.center,
           style: TextStyle(color: bluePrimary),
         ),
-      ),
-    );
-  }
-
-  Widget _buildPostContent(double height) {
-    return Container(
-      height: height * 0.121,
-      padding: const EdgeInsets.all(15),
-      decoration: BoxDecoration(
-        color: bluePrimary,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: const Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 15,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                '18 Januari 2024 | 16:58',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 10,
-                  fontWeight: FontWeight.normal,
-                ),
-              ),
-              Text(
-                'x likes | x dislikes | x komentar',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 10,
-                  fontWeight: FontWeight.normal,
-                ),
-              ),
-            ],
-          ),
-        ],
       ),
     );
   }

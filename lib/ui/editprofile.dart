@@ -71,8 +71,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
       );
       return user;
     } else {
-      print(response.body);
-      print('Get Data failed');
+     
       return null;
     }
   }
@@ -115,11 +114,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
     );
 
     if (response.statusCode == 200) {
-      print('Update successful');
     } else {
-      print(accessToken);
-      print(userId);
-      print('Update failed');
+      
     }
   }
 

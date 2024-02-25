@@ -2,7 +2,6 @@
 import 'package:flutter/material.dart';
 import 'package:temansehat_app/styles/button.dart';
 import 'package:temansehat_app/styles/color.dart';
-import 'package:temansehat_app/ui/editprofile.dart';
 
 class SettingPage extends StatefulWidget {
   const SettingPage({Key? key}) : super(key: key);
@@ -15,7 +14,6 @@ class _SettingsPageState extends State<SettingPage> {
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
-    final height = MediaQuery.of(context).size.height;
 
     return Scaffold(
       backgroundColor: bgColor,
@@ -106,7 +104,6 @@ class AboutPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
-    final height = MediaQuery.of(context).size.height;
 
     return Scaffold(
       backgroundColor: bgColor,

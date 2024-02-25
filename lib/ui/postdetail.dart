@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+
 import 'package:flutter/material.dart';
 import 'package:temansehat_app/styles/button.dart';
 import 'package:temansehat_app/styles/color.dart';
@@ -7,10 +10,24 @@ import 'package:temansehat_app/ui/home.dart';
 import 'package:temansehat_app/ui/mood.dart';
 import 'package:temansehat_app/ui/news.dart';
 import 'package:temansehat_app/ui/profile.dart';
+import 'package:temansehat_app/utils/preferences.dart';
+import 'package:temansehat_app/utils/uri.dart';
 
 class DetailPage extends StatefulWidget {
-  
-  DetailPage({Key? key}) : super(key: key);
+  final String postId;
+  final String title;
+  final String description;
+  final String postDate;
+  final Map<String, dynamic>? commentsData;
+
+  DetailPage({
+    Key? key,
+    required this.postId,
+    required this.title,
+    required this.description,
+    required this.postDate,
+    required this.commentsData,
+  }) : super(key: key);
 
   @override
   State<DetailPage> createState() => _DetailPageState();
@@ -36,6 +53,36 @@ class _DetailPageState extends State<DetailPage> {
       MaterialPageRoute(builder: (context) => destinations[index]),
     );
   }
+
+  void showComments() {
+    showCommentsPopup(context, widget.postId);
+  }
+
+  Future<Map<String, dynamic>> getPost() async {
+    String? accessToken = await getTokenLocally();
+    final response = await http.get(
+      Uri.parse('$backendUri/api/users/posts'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $accessToken',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      var responseData = jsonDecode(response.body);
+
+      if (responseData.isNotEmpty) {
+        return responseData;
+      } else {
+        print('No posts found in the response');
+        return {};
+      }
+    } else {
+      print('Get Post failed');
+      return {}; // Return null or handle the error accordingly
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -119,7 +166,7 @@ class _DetailPageState extends State<DetailPage> {
                       CrossAxisAlignment.start, // Set alignment to start
                   children: [
                     Text(
-                      'Lorem Ipsum.',
+                      widget.title,
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 25,
@@ -127,16 +174,12 @@ class _DetailPageState extends State<DetailPage> {
                       ),
                     ),
                     Text(
-                      '18 Januari 2024 | 16.58',
+                      widget.postDate,
                       style: TextStyle(fontSize: 12, color: Colors.white),
                     ),
                     const SizedBox(height: 10),
-                    Image.network(
-                      'https://picsum.photos/250?image=9',
-                    ),
-                    const SizedBox(height: 10),
                     Text(
-                      'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis convallis aliquam arcu, eget ullamcorper nulla consectetur eget. Quisque interdum vehicula orci, id mattis sapien congue a.',
+                      widget.description,
                       style: TextStyle(fontSize: 16, color: Colors.white),
                       textAlign: TextAlign.left,
                     ),
@@ -169,17 +212,7 @@ class _DetailPageState extends State<DetailPage> {
                           ),
                           IconButton(
                             onPressed: () {
-                              // Add your logic for thumb down action
-                            },
-                            icon: Icon(
-                              Icons.thumb_down_alt_rounded,
-                              color: Colors.white,
-                              size: 15,
-                            ),
-                          ),
-                          IconButton(
-                            onPressed: () {
-                              // Add your logic for comment action
+                              showComments();
                             },
                             icon: Icon(
                               Icons.mode_comment_rounded,
@@ -202,36 +235,13 @@ class _DetailPageState extends State<DetailPage> {
                     ),
                     const SizedBox(height: 5),
                     InkWell(
-                      onTap: () {
-                        showCommentsPopup(context);
-                      },
+                      onTap: () {},
                       child: const Text(
-                        'View all comments',
+                        'View comments',
                         style: TextStyle(fontSize: 12, color: Colors.grey),
                       ),
                     ),
                     const SizedBox(height: 5),
-                    RichText(
-                      text: const TextSpan(
-                        children: [
-                          TextSpan(
-                            text: 'User 1',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
-                              color: Colors.white,
-                            ),
-                          ),
-                          TextSpan(
-                            text: ' i have a sad story bla bla bla ',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
                   ],
                 ),
               ),

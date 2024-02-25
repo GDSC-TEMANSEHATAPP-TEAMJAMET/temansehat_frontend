@@ -9,7 +9,6 @@ import 'package:temansehat_app/ui/mood.dart';
 import 'package:temansehat_app/ui/news.dart';
 import 'package:temansehat_app/ui/profile.dart';
 import 'package:temansehat_app/ui/setting.dart';
-import 'package:temansehat_app/utils/api.dart';
 import 'package:temansehat_app/utils/preferences.dart';
 import 'package:temansehat_app/utils/uri.dart';
 
@@ -42,8 +41,6 @@ class _HomePageState extends State<HomePage> {
       );
       return user;
     } else {
-      print(response.body);
-      print('Get Data failed');
       return null; // Return null or handle the error accordingly
     }
   }

@@ -1,20 +1,26 @@
 import 'package:flutter/material.dart';
-import 'package:temansehat_app/ui/news.dart';
+import 'package:temansehat_app/ui/home.dart';
 import 'package:temansehat_app/ui/welcome.dart';
+import 'package:temansehat_app/utils/preferences.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  String? token = await getTokenLocally();
+
+  runApp(MyApp(token: token));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final String? token;
+
+  const MyApp({Key? key, required this.token}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(fontFamily: 'Poppins'),
       debugShowCheckedModeBanner: false,
-      home: WelcomePage(),
+      home: token == null ? WelcomePage() : HomePage(),
     );
   }
 }
