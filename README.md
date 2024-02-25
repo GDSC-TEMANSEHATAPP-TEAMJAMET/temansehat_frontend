@@ -45,11 +45,36 @@ flutter run
 <br />
 
 
-### Signin page
+### Login page
 <img src="https://github.com/GDSC-TEMANSEHATAPP-TEAMJAMET/temansehat_frontend/assets/146084224/7550172b-ddb8-423b-a354-c49277b64cab" width="300" />
 <br />
 
-### Signup page
-<img src="https://github.com/GDSC-TEMANSEHATAPP-TEAMJAMET/temansehat_frontend/assets/146084224/422945ad-50c1-4d41-b2a6-f54f4332b009
-" width="300" />
+### Register page
+<img src="https://github.com/GDSC-TEMANSEHATAPP-TEAMJAMET/temansehat_frontend/assets/146084224/422945ad-50c1-4d41-b2a6-f54f4332b009" width="300" />
+<br />
+
+
+### Home page
+<img src="https://github.com/GDSC-TEMANSEHATAPP-TEAMJAMET/temansehat_frontend/assets/146084224/b567ae49-01e1-47ed-944f-097321d7ce88" width="300" />
+<br />
+
+
+### Mood page
+<img src="https://github.com/GDSC-TEMANSEHATAPP-TEAMJAMET/temansehat_frontend/assets/146084224/0ea89f43-6f10-4418-b130-a5671dda4bb1" width="300" />
+<br />
+
+
+### Profile page
+<img src="https://github.com/GDSC-TEMANSEHATAPP-TEAMJAMET/temansehat_frontend/assets/146084224/7d4d6431-da2c-4183-8f3c-efb4be623af9" width="300" />
+<br />
+
+
+### Forum page
+<img src="https://github.com/GDSC-TEMANSEHATAPP-TEAMJAMET/temansehat_frontend/assets/146084224/6e7f4976-1f98-4686-86a7-29f0f6d3b557" width="300" />
+<br />
+
+
+### Post Detail page
+<img src="https://github.com/GDSC-TEMANSEHATAPP-TEAMJAMET/temansehat_frontend/assets/146084224/3a74a320-16ac-4fb9-b183-858c9dc113a1" width="300" />
+<img src="https://github.com/GDSC-TEMANSEHATAPP-TEAMJAMET/temansehat_frontend/assets/146084224/be392db0-114f-45fb-89e4-0a597d35a5fa" width="300" />
 <br />
