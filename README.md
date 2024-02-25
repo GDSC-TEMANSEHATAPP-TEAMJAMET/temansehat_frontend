@@ -38,10 +38,18 @@ flutter run
 
 
 ## Screenshots
+
+
+### Welcome page
+<img src="https://github.com/GDSC-TEMANSEHATAPP-TEAMJAMET/temansehat_frontend/assets/146084224/e7b11d4c-ca35-43c2-8ec3-addb95e8025d" width="300" />
+<br />
+
+
 ### Signin page
-<img src="" width="300" />
+<img src="https://github.com/GDSC-TEMANSEHATAPP-TEAMJAMET/temansehat_frontend/assets/146084224/7550172b-ddb8-423b-a354-c49277b64cab" width="300" />
 <br />
 
 ### Signup page
-<img src="" width="300" />
+<img src="https://github.com/GDSC-TEMANSEHATAPP-TEAMJAMET/temansehat_frontend/assets/146084224/422945ad-50c1-4d41-b2a6-f54f4332b009
+" width="300" />
 <br />
